@@ -7,13 +7,13 @@ frame_fb=frame_source[frame_source.loc[:,'分包商代号']==fbsdh].fillna(value
 frame_fb.loc[:,'本期分包量']=frame_fb.loc[:,'本期分包量'].apply(lambda x:round(x,2))
 frame_hd=frame_fb[frame_fb.loc[:,'分包清单编号'].str.contains('421-(.+)')]#索引涵洞通道行
 frame_hd=frame_hd.loc[:,['零号台账起始桩号', '分包清单编号', '本期分包量','分包清单名称']]#索引涵洞通道列
-frame_hd_sv=frame_hd.pivot_table(['本期分包量'],index=['分包清单编号','分包清单名称'],columns=['零号台账起始桩号']).dropna(how='all',axis=1)#pivot
+frame_hd_sv=frame_hd.pivot_table(['本期分包量'],index=['分包清单编号','分包清单名称'],columns=['零号台账起始桩号'],aggfunc='sum').dropna(how='all',axis=1)#pivot
 frame_hd_sv.to_csv(r'c:\python tem\%s_涵洞.csv'%(fbsdh),encoding='utf-8-sig')
 frame_zjdz=frame_fb[frame_fb.loc[:,'零号台账内容'].str.contains('(桩基|墩柱)')].loc[:,['零号台账内容','零号台账起始桩号','零号台帐终止桩号','分包清单名称','分包清单编号','本期分包量']]
-frame_zjdz_sv=frame_zjdz.pivot_table(['本期分包量'],index=['零号台账起始桩号','零号台帐终止桩号'],columns=['零号台账内容','分包清单编号','分包清单名称'])
+frame_zjdz_sv=frame_zjdz.pivot_table(['本期分包量'],index=['零号台账起始桩号','零号台帐终止桩号'],columns=['零号台账内容','分包清单编号','分包清单名称'],aggfunc='mean')
 frame_zjdz_sv.to_csv(r'c:\python tem\%s_桩基墩柱.csv'%(fbsdh),encoding='utf-8-sig')
 frame_yzl=frame_source[frame_source.loc[:,'零号台账内容'].str.match(r'^预制梁')].loc[:,['零号台账内容','零号台账起始桩号','零号台帐终止桩号','分包清单名称','分包清单编号','本期分包量']]
-frame_yzl=frame_yzl.pivot_table(['本期分包量'],index=['零号台账起始桩号','零号台帐终止桩号'],columns=['零号台账内容','分包清单编号','分包清单名称'])
+frame_yzl=frame_yzl.pivot_table(['本期分包量'],index=['零号台账起始桩号','零号台帐终止桩号'],columns=['零号台账内容','分包清单编号','分包清单名称'],aggfunc='mean')
 frame_yzl.to_csv(r'c:\python tem\%s_预制梁.csv'%(fbsdh),encoding='utf-8-sig')
 frame_other=frame_fb[frame_fb.loc[:,'分包清单编号'].str.contains('421-(.+)')!=1]#drop涵洞通道行
 frame_other=frame_other[frame_other.loc[:,'零号台账内容'].str.contains('(桩基|墩柱)')!=1]#drop桩基墩柱行
