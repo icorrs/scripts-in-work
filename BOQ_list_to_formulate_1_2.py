@@ -2,45 +2,31 @@
 import openpyxl
 import pprint
 
-#删除字符串最后一字符
-def del_lastchar(char):
-    de_str=''
-    for word in list(char)[:-1]:
-        de_str+=word
-    return de_str
-
 #拆分g4部位明细，如果是单个部位则返回单个部位列表；如果是多个部位，则返回('路基工程主线路基排水工程排水沟排水沟K26+200～K27+571', 'K26+200～K27+571')列表
 def word_clean(source_str):
-    list=source_str.replace('_x000D_\n','').replace(' ','').split('/') #按'/'分割后的部位列表
+    list0=source_str.replace('_x000D_','').replace(' ','').split('/') #按'/'分割后的部位列表
     list1=[]#接受list最后一项按','分割后的列表
     feature_list=[]#接受处理完毕的部位列表，每个部位对应wbs表一行
     feature=''#feature处理初始文本
     if source_str.find('/')==-1:#如果不含'/'则直接返回原文本
         feature_list.append(source_str)
         return feature_list
-    elif list[len(list)-1].find(',')==-1:#如果含'/'但最后一项不含','则直接去'/'连接
-        for word in list:
+    elif list0[-1].find(',')==-1:#如果含'/'但最后一项不含','则直接去'/'连接
+        for word in list0:
             feature+=word
         feature_list.append(feature)
         return feature_list
     else:#如果含'/'且最后一项含','则返回多个计量部位与子部位配对的元组
-        list1=list[len(list)-1].split(',')
-        for i in range(len(list)-1):
-            feature+=list[i]
+        list1=list0[-1].split(',')
+        for i in range(len(list0)-1):
+            feature+=list0[i]
         for word in list1:
             feature_list.append(feature+str(word))
         return zip(feature_list,list1)
 
-#获取计量单路径并初始化计算式为空
-def init_costsheet():
-    cost_loc=input('please enter cost list route:')
-    print('loading and innitializing cost_list.....')
-    cost_wb=openpyxl.load_workbook(filename=cost_loc)
-    for sh in cost_wb:
-        sh['a10']=''
 
 #获取wbs计量明细，部位明细+清单号为key（与word_clean子部位对应），计量量为value
-def wbs_dic():
+def get_wbs_dic():
     wbs_loc=input('please enter wbs list route:')
     print('loading wbs list.........')
     wbs_wb=openpyxl.load_workbook(filename=wbs_loc)
@@ -52,7 +38,7 @@ def wbs_dic():
     return wbs_dic
 
 #获取boq，编号为key，单位为value[0],名称为value[1]
-def boq_dic():
+def get_boq_dic():
     boq_loc=input('please enter boq list route:')
     print('loading boq list.........')
     boq_wb=openpyxl.load_workbook(filename=boq_loc)
@@ -69,9 +55,14 @@ def boq_dic():
 #主程序部分
 def cost_cal():
     wrong_list=[]#返回处理失败的表格列表
-    init_costsheet()
-    wbs_dic=wbs_dic()
-    boq_dic=boq_dic()
+    #获取计量单路径并初始化计算式为空
+    cost_loc=input('please enter cost list route:')
+    print('loading and innitializing cost_list.....')
+    cost_wb=openpyxl.load_workbook(filename=cost_loc)
+    for sh in cost_wb:
+        sh['a10']=''
+    wbs_dic=get_wbs_dic()
+    boq_dic=get_boq_dic()
     for sh in cost_wb:
         print('processing %s'%(sh.title))
         try:
@@ -86,7 +77,7 @@ def cost_cal():
                 sh['a10']=str(sh['a10'].value)+'合计：'
                 for feature,word in word_clean(sh['g4'].value):
                     sh['a10']=str(sh['a10'].value)+str(wbs_dic[str(feature)+str(sh['b4'].value)])+'+'
-                sh['a10']=del_lastchar(sh['a10'].value)+'='+str(sh['e7'].value)+unit
+                sh['a10']=str(sh['a10'].value)[:-1]+'='+str(sh['e7'].value)+unit
         except:
             print('something wrong in %s'%(sh.title))
             if sh['b4'].value in ['203-1-a','203-1-b','204-1-a','204-1-b']:
@@ -95,6 +86,7 @@ def cost_cal():
             else:
                 wrong_list.append(sh.title)
                 sh['a10']='尝试失败,且非土石方计量'
+                raise
     print('saving result...........')
     cost_wb.save(cost_loc)
     print('以下%s个表格发生错误:'%(len(wrong_list)))
