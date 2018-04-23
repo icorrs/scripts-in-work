@@ -30,5 +30,7 @@ def wage_sum():
     frame2.to_csv(os.path.join(os.path.dirname(path),'earning.csv'),encoding='utf-8-sig')
     frame3=frame1.pivot_table(index=['月份'],values=['合计（元）'],aggfunc='sum')
     frame3.to_csv(os.path.join(os.path.dirname(path),'month_sum.csv'),encoding='utf-8-sig')
+    frame4=frame1.pivot_table(index=['姓名'],columns=['月份'],aggfunc='sum')
+    frame4.to_csv(os.path.join(os.path.dirname(path),'name_month.csv'),encoding='utf-8-sig')
 if __name__=='__main__':
     wage_sum()
