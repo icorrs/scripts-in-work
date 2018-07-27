@@ -11,10 +11,11 @@ list_dir = []
 sub_word = ''
 f = open(r'c:\python tem\boq_list.txt','w',encoding='utf-8')
 l = open(r'c:\python tem\boq_list_noindex.txt','w',encoding='utf-8')
-for i in range(1,471):
-    list_source.append(sh['a'+str(i)].value)
+for i in range(1,1741):
+    list_source.append(str(sh['a'+str(i)].value))
 for i in range(len(list_source)):
-    if list_source[i][0] in ('1','2','4'):
+    pat = r'\d{3}-.+'
+    if re.match(pat,list_source[i]):
         sub_word=list_source[i]
         list_dir.append(sub_word)
     else:

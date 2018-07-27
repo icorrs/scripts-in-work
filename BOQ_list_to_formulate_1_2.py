@@ -37,8 +37,9 @@ def get_wbs_dic():
     wbs_dic={}
     wbs_sh=wbs_wb.get_sheet_by_name('wbs')
     print('geting wbs dict.......')
-    for i in range(2,7000):
-        wbs_dic.setdefault(str(wbs_sh['b'+str(i)].value).replace('_x000D_','').replace(' ',''),wbs_sh['c'+str(i)].value)
+    for i in range(2,7509):
+        wbs_dic.setdefault(str(wbs_sh['b'+str(i)].value).replace('_x000D_','').replace(' ','')\
+        .replace('/',''),wbs_sh['c'+str(i)].value)
     return wbs_dic
 
 
@@ -92,7 +93,7 @@ def cost_cal():
             else:
                 wrong_list.append(sh.title)
                 sh['a10']='尝试失败,且非土石方计量'
-                raise
+                #raise
     print('saving result...........')
     cost_wb.save(cost_loc)
     print('以下%s个表格发生错误:'%(len(wrong_list)))
